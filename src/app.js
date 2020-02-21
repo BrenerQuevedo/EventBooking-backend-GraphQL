@@ -1,5 +1,7 @@
 const express = require("express");
 const cors = require('cors')
+const graphqlHttp = require("express-graphql")
+const {buildSchema} = require("graphql")
 
 const app = express();
 
@@ -7,10 +9,28 @@ const app = express();
 app.use(cors());
 app.use(express.json()); 
 
+app.use("/graphql", graphqlHttp({
+    schema:buildSchema(`
+        type RootQuery {
+            events: [String!]!
+        }
+    
+        type RootMutation {
+            createEvent(name: String): String
+        }
 
-app.get("/", (req, res, next) => {
-    res.send("hello world");
-})
+        schema {
+            query: RootQuery
+            mutation: RootMutation
+        }
+    `),
+    rootValue: {
+        events: () => {
+            //TODO
+            return ["exemplo", "teste"]
+        }
+    }
+}));
 
 
 app.listen(3000)

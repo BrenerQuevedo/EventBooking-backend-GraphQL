@@ -29,7 +29,7 @@ app.use("/graphql", graphqlHttp({
             //TODO
             return ["exemplo", "teste"]
         },
-        createEvents: (args) => {
+        createEvent: (args) => {
             const eventName = args.name;
             return eventName;
         }

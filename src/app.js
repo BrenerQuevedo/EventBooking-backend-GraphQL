@@ -1,5 +1,5 @@
 const express = require("express");
-const cors = require('cors')
+const cors = require("cors")
 const graphqlHttp = require("express-graphql")
 const {buildSchema} = require("graphql")
 
@@ -12,7 +12,7 @@ app.use(express.json());
 app.use("/graphql", graphqlHttp({
     schema:buildSchema(`
         type RootQuery {
-            events: [String!]!
+            events(booked: Boolean): [String!]!
         }
     
         type RootMutation {
@@ -28,9 +28,15 @@ app.use("/graphql", graphqlHttp({
         events: () => {
             //TODO
             return ["exemplo", "teste"]
+        },
+        createEvents: (args) => {
+            const eventName = args.name;
+            return eventName;
         }
-    }
-}));
+    },
+    graphiql: true
+    })
+);
 
 
 app.listen(3000)

@@ -9,14 +9,40 @@ const app = express();
 app.use(cors());
 app.use(express.json()); 
 
+// A exclamação serve para definir que o atributo não pode ser um valor NULL 
+
+// GraphQL tem uma tipagem própria (Query language)
+//Não existe o tipo data em GraphQL
+
+//Query: GET
+//Mutation: POST, PUT, DELETE 
+
+//input: keyword usada para entrada de params numa mutation.
+
 app.use("/graphql", graphqlHttp({
-    schema:buildSchema(`
+    schema:buildSchema(` 
+        type Event {
+            _id: ID!
+            title: String!
+            description: String!
+            price: Float!
+            date: String!
+        }
+
+        input EventInput {
+            title: String!
+            description: String!
+            price: Float!
+            date: String!
+        }
+
+
         type RootQuery {
-            events(booked: Boolean): [String!]!
+            events: [Event!]!
         }
     
         type RootMutation {
-            createEvent(name: String): String
+            createEvent(eventInput: EventInput): String
         }
 
         schema {

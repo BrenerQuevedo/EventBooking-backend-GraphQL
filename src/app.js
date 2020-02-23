@@ -19,6 +19,9 @@ app.use(express.json());
 
 //input: keyword usada para entrada de params numa mutation.
 
+//salvando localmente enquanto n adiciono o Mongo
+const events = [];
+
 app.use("/graphql", graphqlHttp({
     schema:buildSchema(` 
         type Event {
@@ -53,11 +56,18 @@ app.use("/graphql", graphqlHttp({
     rootValue: {
         events: () => {
             //TODO
-            return ["exemplo", "teste"]
+            return events;
         },
         createEvent: (args) => {
-            const eventName = args.name;
-            return eventName;
+            const event = {
+                _id: Math.random().toString(),
+                title: args.title,
+                description: args.description,
+                price: +args.price,
+                date: args.date, 
+            };
+            events.push(event);
+            return event;
         }
     },
     graphiql: true

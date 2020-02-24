@@ -22,6 +22,8 @@ app.use(express.json());
 //salvando localmente enquanto n adiciono o Mongo
 const events = [];
 
+//É necessário passar o tipo junto com o argumento args.inputType para qão haja erro de interpretação
+
 app.use("/graphql", graphqlHttp({
     schema:buildSchema(` 
         type Event {
@@ -45,7 +47,7 @@ app.use("/graphql", graphqlHttp({
         }
     
         type RootMutation {
-            createEvent(eventInput: EventInput): String
+            createEvent(eventInput: EventInput): Event
         }
 
         schema {
@@ -61,11 +63,12 @@ app.use("/graphql", graphqlHttp({
         createEvent: (args) => {
             const event = {
                 _id: Math.random().toString(),
-                title: args.title,
-                description: args.description,
-                price: +args.price,
-                date: args.date, 
+                title: args.eventInput.title,
+                description: args.eventInput.description,
+                price: +args.eventInput.price,
+                date: args.eventInput.date, 
             };
+            
             events.push(event);
             return event;
         }

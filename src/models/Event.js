@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 
-const eventSchema = new mongoose.Schema({
+const EventSchema = new mongoose.Schema({
     title :{
         type: String,
         required: true,        
@@ -18,12 +18,13 @@ const eventSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
-    /*location:{
+    location:{
         type: String,
         required: true,
-    }*/
-
+    }
 });
 
 
+const Event = mongoose.model("Event", EventSchema)
  
+module.exports = Event;

@@ -4,9 +4,9 @@ const graphqlHttp = require("express-graphql")
 const mongoose = require("mongoose");
 
 const {buildSchema} = require("graphql")
+const Event = require("./models/Event")
 
 const app = express();
-
 
 app.use(cors());
 app.use(express.json()); 
@@ -20,9 +20,6 @@ app.use(express.json());
 //Mutation: POST, PUT, DELETE 
 
 //input: keyword usada para entrada de params numa mutation.
-
-//salvando localmente enquanto n adiciono o Mongo
-const events = [];
 
 //É necessário passar o tipo junto com o argumento args.inputType para qão haja erro de interpretação
 
@@ -60,31 +57,45 @@ app.use("/graphql", graphqlHttp({
         }
     `),
     rootValue: {
-        events: () => {
-            //TODO
-            return events;
+        events:  () => {
+          return Event.find()
+           .then(events => {
+                return events.map(event => {
+                    //_id: event._doc._id.toString() é o mesmo que event.id
+                    return {...event._doc, _id: event.id };
+                });
+           })
+           .catch(err => {
+               throw err;
+           }); 
         },
         createEvent: (args) => {
-            const event = {
-                _id: Math.random().toString(),
+          
+            const event = new Event({
                 title: args.eventInput.title,
                 description: args.eventInput.description,
                 price: +args.eventInput.price,
-                date: args.eventInput.date, 
-            };
+                date: new Date(args.eventInput.date),
+                location: args.eventInput.location
+            });
             
-            events.push(event);
-            return event;
+            return event.save().then( res => {
+                return {...res._doc, _id: event.id};
+            } ).catch(err => {
+
+                throw err;
+            });
         }
     },
     graphiql: true
     })
 );
 
-mongoose.connect(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@omnistack-sm6zk.mongodb.net/graphQL?retryWrites=true&w=majority`, 
+mongoose.connect(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@omnistack-sm6zk.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`, 
     {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex:true })
 .then(() => {
     app.listen(3000);
+    
 }).catch(err => {
     console.log(err);
 });

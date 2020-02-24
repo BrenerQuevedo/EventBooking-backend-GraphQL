@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors")
 const graphqlHttp = require("express-graphql")
+const mongoose = require("mongoose");
+
 const {buildSchema} = require("graphql")
 
 const app = express();
@@ -77,5 +79,10 @@ app.use("/graphql", graphqlHttp({
     })
 );
 
-
-app.listen(3000)
+mongoose.connect(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@omnistack-sm6zk.mongodb.net/graphQL?retryWrites=true&w=majority`, 
+    {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex:true })
+.then(() => {
+    app.listen(3000);
+}).catch(err => {
+    console.log(err);
+});

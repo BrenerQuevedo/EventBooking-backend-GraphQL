@@ -34,6 +34,7 @@ app.use("/graphql", graphqlHttp({
             description: String!
             price: Float!
             date: String!
+            location: String!
         }
 
         input EventInput {
@@ -41,6 +42,7 @@ app.use("/graphql", graphqlHttp({
             description: String!
             price: Float!
             date: String!
+            location: String!
         }
 
 

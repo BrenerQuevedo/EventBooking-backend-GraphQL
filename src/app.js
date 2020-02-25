@@ -3,8 +3,10 @@ const cors = require("cors")
 const graphqlHttp = require("express-graphql")
 const mongoose = require("mongoose");
 
-const {buildSchema} = require("graphql")
-const Event = require("./models/Event")
+const {buildSchema} = require("graphql");
+
+const User = require("./models/User");
+const Event = require("./models/Event");
 
 const app = express();
 
@@ -34,6 +36,17 @@ app.use("/graphql", graphqlHttp({
             location: String!
         }
 
+        type User {
+            _id: !ID
+            email: String!
+            password: String
+        }
+
+        input UserInput {
+            email: String!
+            password: String!
+        }
+
         input EventInput {
             title: String!
             description: String!
@@ -48,6 +61,7 @@ app.use("/graphql", graphqlHttp({
         }
     
         type RootMutation {
+            createUser(userInput: UserInput): User
             createEvent(eventInput: EventInput): Event
         }
 
@@ -82,9 +96,21 @@ app.use("/graphql", graphqlHttp({
             return event.save().then( res => {
                 return {...res._doc, _id: event.id};
             } ).catch(err => {
-
                 throw err;
             });
+        },
+        
+        createUser: (args) => {
+            const user = new User({
+                email: args.userInput.email,
+                password: args.userInput.password,
+            });
+
+            return user.save().then(res => {
+                return {...res._doc, _id: user.id}
+            }).catch(err => {
+                throw err;
+            })
         }
     },
     graphiql: true

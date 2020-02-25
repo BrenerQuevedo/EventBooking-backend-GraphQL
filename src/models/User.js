@@ -9,7 +9,7 @@ const UserSchema = new mongoose.Schema({
     password : {
         type: String,
         required: true,
-        select: false
+        //select: false n faz mt sentido usar sabendo q eu posso retornar somente oq é pedido
     },
     email:{
         type: String,

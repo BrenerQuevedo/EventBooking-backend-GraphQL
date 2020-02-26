@@ -91,12 +91,29 @@ app.use("/graphql", graphqlHttp({
                 description: args.eventInput.description,
                 price: +args.eventInput.price,
                 date: new Date(args.eventInput.date),
-                location: args.eventInput.location
+                location: args.eventInput.location,
+                creator: "5e55cf61a29225041cc0763b"
             });
             
-            return event.save().then( res => {
-                return {...res._doc, _id: event.id};
-            } ).catch(err => {
+            let createdEvent;
+
+            return event
+            .save()
+            .then( res => {
+                createdEvent = {...res._doc, _id: event.id}; 
+                return User.findById("5e55cf61a29225041cc0763b");
+            })
+            .then(user => {
+                if (user) {
+                    throw new Error("User exists already. ")
+                }
+                user.createdEvents.push(event);
+                return user.save();
+            })
+            .then(result => {
+                return createdEvent;
+            })
+            .catch(err => {
                 throw err;
             });
         },

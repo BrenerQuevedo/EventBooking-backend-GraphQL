@@ -2,20 +2,16 @@ const mongoose = require("mongoose");
 
 
 const UserSchema = new mongoose.Schema({
-    name :{
-        type: String,
-        required: true,        
-    },
-    password : {
-        type: String,
-        required: true,
-        //select: false n faz mt sentido usar sabendo q eu posso retornar somente oq é pedido
-    },
     email:{
         type: String,
         required: true,
         unique: true,
         dropsDups: true
+    },
+    password : {
+        type: String,
+        required: true,
+        //select: false n faz mt sentido usar sabendo q eu posso retornar somente oq é pedido
     },
     createdEvents: [
         {

@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors")
 const graphqlHttp = require("express-graphql")
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
 const {buildSchema} = require("graphql");
 
@@ -37,7 +38,7 @@ app.use("/graphql", graphqlHttp({
         }
 
         type User {
-            _id: !ID
+            _id: ID!
             email: String!
             password: String
         }
@@ -99,18 +100,22 @@ app.use("/graphql", graphqlHttp({
                 throw err;
             });
         },
-        
-        createUser: (args) => {
-            const user = new User({
-                email: args.userInput.email,
-                password: args.userInput.password,
-            });
 
-            return user.save().then(res => {
-                return {...res._doc, _id: user.id}
-            }).catch(err => {
-                throw err;
+        createUser: (args) => {
+            return bcrypt.hash(args.userInput.password, 12)
+            .then(hashedPassword => {                
+                const user = new User({
+                    email: args.userInput.email,
+                    password: hashedPassword,
+                });
+                return user.save();
             })
+            .then(res => {
+                return {...res._doc, _id: res.id}
+            })
+            .catch(err => {
+                throw err;
+            });
         }
     },
     graphiql: true

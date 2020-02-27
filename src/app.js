@@ -35,12 +35,14 @@ app.use("/graphql", graphqlHttp({
             price: Float!
             date: String!
             location: String!
+            creator: User!
         }
 
         type User {
             _id: ID!
             email: String!
             password: String
+            createdEvents: [Event!]
         }
 
         input UserInput {
@@ -104,8 +106,8 @@ app.use("/graphql", graphqlHttp({
                 return User.findById("5e55cf61a29225041cc0763b");
             })
             .then(user => {
-                if (user) {
-                    throw new Error("User exists already. ")
+                if (!user) {
+                    throw new Error("User not <found></found>. ")
                 }
                 user.createdEvents.push(event);
                 return user.save();

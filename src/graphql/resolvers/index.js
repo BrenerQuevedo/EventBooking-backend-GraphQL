@@ -62,7 +62,7 @@ events: async () => {
         populate: { path: "createdEvents" },
         
       });
-      
+
       return events.map(e => {
           return {
               ...e._doc,
@@ -148,5 +148,28 @@ events: async () => {
           } catch (err) {
             throw err;
           }
+    },
+
+    bookEvent: async args => {
+        try{
+        const user = "5e55cf61a29225041cc0763b"
+        const event = args.id
+
+        const newBooking = new Booking({
+            user,
+            event
+        });
+
+        const res = await newBooking.save();
+        
+        return {
+            ...newBooking._doc,
+            createdAt: new Date(res.createdAt).toISOString(),
+            updatedAt: new Date(res.updatedAt).toISOString(),
+        }
+        
+        } catch(error) {
+            throw error;
+        }
     }
 }

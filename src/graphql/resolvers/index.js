@@ -2,7 +2,7 @@ const bcrypt = require("bcryptjs");
 
 const User = require("../../models/User");
 const Event = require("../../models/Event");
-
+const Booking = require("../../models/Booking");
 
 const user = async userId => {
     try {
@@ -61,14 +61,30 @@ events: async () => {
         path: "creator",
         populate: { path: "createdEvents" },
         
+      });
+      
+      return events.map(e => {
+          return {
+              ...e._doc,
+              date: new Date(e.date).toISOString(),
+          }
       })
-      return events;
-
     } catch (err) {
       throw err;
     }
   },
+    booking: async () => {
+        try {
+            const bookings = await Booking.find()
+            .populate("user")
+            .populate("event")
 
+            return bookings;
+        } catch (error) {
+            throw error;
+        }
+
+    },
     createEvent: async (args) => {
       
         const event = new Event({

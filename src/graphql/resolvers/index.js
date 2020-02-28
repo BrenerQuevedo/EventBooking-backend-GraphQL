@@ -77,8 +77,10 @@ module.exports = {
     },
     bookings: async () => {
         try {
-            const bookings = await Booking.find().populate("user")
-            
+            const bookings = await Booking.find()
+            .populate("user")
+            .populate("event")
+
             return bookings.map(booking => {
                 return {
                     ...booking._doc,
@@ -86,7 +88,7 @@ module.exports = {
                     updatedAt: new Date(booking._doc.updatedAt).toISOString()
                 };
             });
-            
+
         } catch (err) {
             throw err;
         }
@@ -105,14 +107,15 @@ module.exports = {
         let createdEvent;
 
         try {
-
             const res = await event.save();
+
+            await res.populate("creator");
 
             createdEvent = {
                 ...res._doc,
-                _id: event.id,
-                date: new Date(event._doc.date).toISOString(),
-                creator: user.bind(this, res._doc.creator)
+                _id: res.id,
+                date: new Date(res._doc.date).toISOString(),
+                //creator: user.bind(this, res._doc.creator)
             };
 
             const owner = await User.findById("5e55cf61a29225041cc0763b");
@@ -158,19 +161,20 @@ module.exports = {
 
     bookEvent: async args => {
         try {
-            //const user = "5e55cf61a29225041cc0763b"
+            const user = "5e55cf61a29225041cc0763b"
             const idEvent = await Event.findOne({ _id: args.eventId });
 
 
             const newBooking = new Booking({
-                user: "5e55cf61a29225041cc0763b",
+                user,
                 event: idEvent
             });
 
             const res = await newBooking.save();
 
             return {
-                ...newBooking._doc,
+                ...res._doc,
+                _id: res.id,
                 createdAt: new Date(res.createdAt).toISOString(),
                 updatedAt: new Date(res.updatedAt).toISOString(),
             }

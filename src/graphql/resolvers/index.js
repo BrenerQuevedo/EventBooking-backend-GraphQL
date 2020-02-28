@@ -4,6 +4,18 @@ const User = require("../../models/User");
 const Event = require("../../models/Event");
 const Booking = require("../../models/Booking");
 
+
+const handleEvent = event => {
+    return {
+        ...event._doc,
+        _id: event.id,
+        date: new Date(event._doc.date).toISOString(),
+        creator: user.bind(this, event._doc.creator)
+    };
+}; 
+
+
+
 const user = async userId => {
     try {
         const user = await User.findById(userId)
@@ -22,19 +34,22 @@ const events = async eventIds => {
 
         const events = await Event.find({ _id: { $in: eventIds } })
 
-        events.map(event => {
-            return {
-                ...event._doc,
-                _id: event.id,
-                date: new Date(event._doc.date).toISOString(),
-                creator: user.bind(this, event.creator)
-            };
-        });
-        return events;
+        return events.map(handleEvent);
+
     } catch (err) {
         throw err;
     }
 }
+
+const singleEvent = async eventId => {
+    try {
+        const event = await Event.findById(eventId);
+        return handleEvent(event);
+    } catch (err) {
+        throw err;
+    }
+};
+
 
 module.exports = {
     /* events: async () => {
@@ -64,12 +79,7 @@ module.exports = {
 
             });
 
-            return events.map(e => {
-                return {
-                    ...e._doc,
-                    date: new Date(e.date).toISOString(),
-                }
-            });
+            return events.map(handleEvent);
 
         } catch (err) {
             throw err;
@@ -78,12 +88,14 @@ module.exports = {
     bookings: async () => {
         try {
             const bookings = await Booking.find()
-            .populate("user")
-            .populate("event")
+            //.populate("user")
+            //.populate("event")
 
             return bookings.map(booking => {
                 return {
                     ...booking._doc,
+                    user: user.bind(this, booking._doc.user),
+                    event: singleEvent.bind(this, booking._doc.event),
                     createdAt: new Date(booking._doc.createdAt).toISOString(),
                     updatedAt: new Date(booking._doc.updatedAt).toISOString()
                 };
@@ -109,14 +121,9 @@ module.exports = {
         try {
             const res = await event.save();
 
-            await res.populate("creator");
+            //await res.populate("creator");
 
-            createdEvent = {
-                ...res._doc,
-                _id: res.id,
-                date: new Date(res._doc.date).toISOString(),
-                //creator: user.bind(this, res._doc.creator)
-            };
+            createdEvent = handleEvent(res);
 
             const owner = await User.findById("5e55cf61a29225041cc0763b");
 
@@ -161,12 +168,12 @@ module.exports = {
 
     bookEvent: async args => {
         try {
-            const user = "5e55cf61a29225041cc0763b"
+            //const user = "5e55cf61a29225041cc0763b"
             const idEvent = await Event.findOne({ _id: args.eventId });
 
 
             const newBooking = new Booking({
-                user,
+                user: "5e55cf61a29225041cc0763b",
                 event: idEvent
             });
 
@@ -175,9 +182,25 @@ module.exports = {
             return {
                 ...res._doc,
                 _id: res.id,
+                user: user.bind(this, newBooking._doc.user),
+                event: singleEvent.bind(this, newBooking._doc.event),
                 createdAt: new Date(res.createdAt).toISOString(),
                 updatedAt: new Date(res.updatedAt).toISOString(),
             }
+
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    cancelBooking: async args => {
+        try {
+            const booking = await Booking.findById(args.bookingId).populate("event");
+            const event = handleEvent(booking.event)
+            await Booking.deleteOne({ _id: args.bookingId })
+
+            return event;
+
 
         } catch (error) {
             throw error;

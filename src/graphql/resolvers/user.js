@@ -5,17 +5,17 @@ const User = require("../../models/User");
 module.exports = {
 
 
-    createUser: async (args) => {
+    createUser: async ({email, password}) => {
         try {
-            const existingUser = await User.findOne({ email: args.userInput.email });
+            const existingUser = await User.findOne({ email: email });
             if (existingUser) {
                 throw new Error('User exists already.');
             }
 
-            const hashedPassword = await bcrypt.hash(args.userInput.password, 12);
+            const hashedPassword = await bcrypt.hash(password, 12);
 
             const user = new User({
-                email: args.userInput.email,
+                email: email,
                 password: hashedPassword
             });
 
@@ -28,4 +28,7 @@ module.exports = {
         }
     },
 
+    login: async ({email, password}) => {
+        
+    }
 }

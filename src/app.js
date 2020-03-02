@@ -7,7 +7,7 @@ const app = express();
 
 const GraphQLSchemas = require("./graphql/schemas/index");
 const GraphQLResolvers = require("./graphql/resolvers/index");
-
+const authorization = require("./middleware/auth");
 
 app.use(cors());
 app.use(express.json()); 
@@ -25,7 +25,7 @@ app.use(express.json());
 //É necessário passar o tipo junto com o argumento args.inputType para qão haja erro de interpretação
 
 
-
+app.use(authorization);
 
 app.use("/graphql", graphqlHttp({
     schema: GraphQLSchemas,
